@@ -13,6 +13,7 @@ function addTask() {
 
     var newTask = document.createElement("li");
     newTask.innerHTML = `
+        <input type="checkbox" onclick="toggleComplete(this)">
         <span>${taskInput.value}</span>
         <span class="icons">
             <i class="fas fa-edit" onclick="editTask(this)"></i>
@@ -43,13 +44,21 @@ function editTask(element) {
     }
 }
 
+function toggleComplete(checkbox) {
+    var task = checkbox.closest("li");
+    task.classList.toggle("completed");
+    saveTasks();
+}
+
 function saveTasks() {
     var taskList = document.getElementById("taskList");
     var tasks = [];
     
     taskList.childNodes.forEach(function (task) {
         if (task.nodeName === "LI") {
-            tasks.push(task.querySelector("span").textContent);
+            var taskText = task.querySelector("span").textContent;
+            var isCompleted = task.classList.contains("completed");
+            tasks.push({ text: taskText, completed: isCompleted });
         }
     });
 
@@ -63,15 +72,20 @@ function loadTasks() {
     if (storedTasks !== null) {
         var tasks = JSON.parse(storedTasks);
 
-        tasks.forEach(function (taskText) {
+        tasks.forEach(function (task) {
             var newTask = document.createElement("li");
             newTask.innerHTML = `
-                <span>${taskText}</span>
+                <input type="checkbox" ${task.completed ? 'checked' : ''} onclick="toggleComplete(this)">
+                <span>${task.text}</span>
                 <span class="icons">
                     <i class="fas fa-edit" onclick="editTask(this)"></i>
                     <i class="fas fa-trash-alt" onclick="deleteTask(this)"></i>
                 </span>
             `;
+
+            if (task.completed) {
+                newTask.classList.add("completed");
+            }
 
             taskList.appendChild(newTask);
         });
